@@ -85,6 +85,7 @@
       font-weight: bold;
       margin: 5px;
       transition: background-color 0.3s;
+      min-width: 200px; /* Added to ensure equal button width */
     }
     /* Card styles for food items/reservations */
     .card {
@@ -444,7 +445,7 @@
       <!-- Dynamic meal details -->
       <div id="mealDetails" style="margin-bottom: 20px; font-size: 14px; text-align: center;"></div>
       <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-        <button class="button" onclick="showScreen('reservations')">Your Reservations</button>
+        <button class="button" onclick="showScreen('reservations')">Claimed Meals</button>
         <button class="button" onclick="showScreen('foodList')">Back to Food List</button>
       </div>
     </div>
@@ -491,10 +492,10 @@
     </div>
     <div class="content center" style="flex-direction: column; text-align: center;">
       <h2 style="margin-bottom: 20px;">Settings</h2>
-      <div class="settings-option">
+      <div class="settings-option" style="cursor: pointer;" onclick="document.getElementById('themeSwitch').click()">
         <label for="themeSwitch">Theme</label>
-        <input type="checkbox" id="themeSwitch" onchange="toggleDarkMode()" />
-        <span id="themeLabel" style="margin-left: 10px;">Light Mode</span>
+        <input type="checkbox" id="themeSwitch" onchange="toggleDarkMode()" onclick="event.stopPropagation()" style="cursor: pointer;" />
+        <span id="themeLabel" style="margin-left: 10px; cursor: pointer;">Light Mode</span>
       </div>
     </div>
     <div class="footer">
