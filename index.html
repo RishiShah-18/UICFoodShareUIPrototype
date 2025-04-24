@@ -2,527 +2,592 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UIC Food Share - UI Prototype</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UIC Food Share – Full Prototype</title>
+
   <style>
-    /* Base Reset & Styles */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
+    /* ───────────────────────────────────────────────────────────────────────── */
+    /* Core Reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+
+    /* Center phone frame in viewport */
     body {
       background-color: #f5f5f5;
-      color: #333;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-      transition: background-color 0.3s, color 0.3s;
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh;
     }
-    .screen {
-      display: none;
-      width: 375px;
-      height: 812px;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+    /* Fixed-size “device” */
+    .device {
       position: relative;
+      width: 375px; height: 750px;
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       overflow: hidden;
-      transition: background-color 0.3s;
     }
-    .active {
-      display: block;
+
+    /* ── Splash ───────────────────────────────────────────────────────────────── */
+    #splash {
+      position: absolute; top:0; left:0;
+      width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+      background:#fff; z-index:10;
+      transition:opacity 1s ease;
     }
-    /* Header styles */
+    #splash.fade-out { opacity:0; }
+    #splash img { width:120px; }
+
+    /* ── Screens ──────────────────────────────────────────────────────────────── */
+    .screen {
+      position:absolute; top:0; left:0;
+      width:100%; height:100%;
+      display:none;
+    }
+    .screen.active { display:block; }
+
+    /* ── Header ───────────────────────────────────────────────────────────────── */
     .header {
-      width: 100%;
-      height: 60px;
-      background-color: #df6f6f;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
-      cursor: pointer;
+      width:100%; height:60px;
+      background:#df6f6f; color:#fff;
+      display:flex; align-items:center; padding:0 10px;
+      border-top-left-radius:10px; border-top-right-radius:10px;
+      cursor:pointer;
     }
-    .header img.logo {
-      width: 40px;
-      margin-right: 10px;
-    }
-    .header .header-text {
-      font-size: 20px;
-      font-weight: bold;
-    }
-    /* Content area */
+    .header img.logo { width:40px; margin-right:10px; }
+    .header .header-text { font-size:20px; font-weight:bold; }
+
+    /* ── Content ──────────────────────────────────────────────────────────────── */
     .content {
-      padding: 20px;
-      height: calc(100% - 120px); /* header + footer */
-      overflow-y: auto;
+      padding:20px;
+      height:calc(100% - 120px);
+      overflow-y:auto;
     }
-    /* Home Screen info text */
-    .home-info {
-      text-align: center;
-      margin-bottom: 20px;
+    #home .content {
+      display:flex; flex-direction:column;
+      justify-content:center; align-items:center;
     }
-    .home-info p {
-      font-size: 18px;
-      font-weight: bold;
-      line-height: 1.5;
-      margin-bottom: 20px;
-    }
-    /* Button style */
+    .home-info { text-align:center; margin-bottom:8px; }
+    .home-info p { margin-bottom:6px; font-size:18px; font-weight:bold; }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────────── */
     .button {
-      display: inline-block;
-      padding: 15px 25px;
-      background-color: #df6f6f;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 20px;
-      font-weight: bold;
-      margin: 5px;
-      transition: background-color 0.3s;
-      min-width: 200px; /* Added to ensure equal button width */
+      display:inline-block; padding:15px 25px;
+      background:#df6f6f; color:#fff;
+      border:none; border-radius:5px;
+      cursor:pointer; font-size:20px; font-weight:bold;
+      transition:background 0.3s; min-width:200px; line-height:1;
     }
-    /* Card styles for food items/reservations */
+    .button:disabled { background:#aaa; cursor:default; }
+
+    /* ── Cards ───────────────────────────────────────────────────────────────── */
     .card {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      background-color: #fff;
-      transition: background-color 0.3s, border-color 0.3s;
+      border:1px solid #ddd; border-radius:10px;
+      padding:15px; margin-bottom:15px;
+      box-shadow:0 2px 5px rgba(0,0,0,0.1);
+      background:#fff;
     }
-    .card h3 {
-      margin-bottom: 5px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .card p {
-      margin-bottom: 5px;
-      font-size: 14px;
-      color: inherit;
-    }
-    /* Image container in cards */
+    .card h3 { margin-bottom:5px; font-size:18px; font-weight:bold; }
+    .card p { margin-bottom:5px; font-size:14px; }
+    .card p.distance { font-style:italic; color:#555; }
     .card-placeholder {
-      width: 100%;
-      height: 100px;
-      background-color: #e0e0e0;
-      border-radius: 5px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 10px 0;
-      overflow: hidden;
+      width:100%; height:120px; overflow:hidden;
+      border-radius:5px; margin:10px 0;
+      display:flex; align-items:center; justify-content:center;
     }
-    .card-placeholder img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .card-placeholder img { width:100%; height:100%; object-fit:cover; }
+
+    /* ── Status & Countdown ───────────────────────────────────────────────────– */
+    .status { font-weight:bold; margin-bottom:5px; }
+    .countdown { font-size:13px; color:#555; margin-bottom:10px; }
+
+    /* ── QR Container ───────────────────────────────────────────────────────── */
+    #qrContainer { width:200px; height:200px; margin:30px auto 10px; }
+
+    /* ── Confirmation tweaks ─────────────────────────────────────────────────── */
+    #confirmation .content {
+      display:flex; flex-direction:column; align-items:center;
     }
-    /* QR Code placeholder */
-    .qr-placeholder {
-      width: 200px;
-      height: 200px;
-      background-color: #e0e0e0;
-      margin: 30px auto;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 10px;
+    #confirmation #mealDetails {
+      width:100%; max-width:300px; text-align:center; margin-bottom:20px;
     }
-    .qr-placeholder span {
-      font-size: 16px;
-      color: #555;
+    #confirmation .content button {
+      width:80%; max-width:250px; margin-bottom:10px;
     }
-    /* Footer / Bottom Navigation */
+
+    /* ── Reservation actions ─────────────────────────────────────────────────── */
+    .reservation-actions {
+      display:flex; gap:8px; margin-top:10px;
+    }
+    .reservation-actions .view-btn {
+      flex:1; height:48px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .reservation-actions .remove-btn {
+      flex:0 0 48px; height:48px;
+      border:none; border-radius:5px;
+      background:#d32f2f;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+    }
+    .reservation-actions .remove-btn img {
+      width:24px; height:24px;
+      filter: brightness(0) invert(1);
+    }
+
+    #foodList .card .button {
+      display: block;
+      margin: 15px auto 0;
+      max-width: 280px;  /* or whatever you prefer */
+    }
+
+
+    /* ── Footer / nav ───────────────────────────────────────────────────────── */
     .footer {
-      width: 100%;
-      height: 60px;
-      background-color: #f0f0f0;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      position: absolute;
-      bottom: 0;
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
-      transition: background-color 0.3s;
+      width:100%; height:60px; background:#f0f0f0;
+      display:flex; justify-content:space-around; align-items:center;
+      position:absolute; bottom:0;
+      border-bottom-left-radius:10px; border-bottom-right-radius:10px;
     }
-    .nav-button {
-      background: none;
-      border: none;
-      cursor: pointer;
+    .nav-button { background:none; border:none; cursor:pointer; opacity:0.6; }
+    .nav-button.active { opacity:1; }
+    .nav-button img { width:24px; height:24px; }
+
+    /* ── Dark mode (scoped to .device) ──────────────────────────────────────── */
+    .device.dark-mode .screen { background:#2b2b2b; color:#eee; }
+    .device.dark-mode .header { background:#b14444; }
+    .device.dark-mode .card {
+      background:#3c3c3c; border-color:#555; color:#eee;
     }
-    .nav-button img {
-      width: 24px;
-      height: 24px;
+    .device.dark-mode .button {
+      background:#b14444; color:#fff;
     }
-    /* Centering helper */
-    .center {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .device.dark-mode .content h2,
+    .device.dark-mode .content p,
+    .device.dark-mode .home-info p {
+      color:#eee;
     }
-    /* Settings page styles */
-    .settings-option {
-      margin: 15px 0;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+
+    /* ── Enhanced Settings Styles ────────────────────────────────────────────── */
+    #settings .content {
+      display:flex; flex-direction:column; align-items:center; padding-top:40px;
     }
-    .settings-option label {
-      margin-right: 10px;
-      font-weight: bold;
+    .settings-card {
+      width:90%; max-width:320px;
+      background:#fff; border-radius:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      padding:20px; margin-bottom:20px;
     }
-    /* Dark mode styles */
-    .dark-mode {
-      background-color: #2b2b2b;
-      color: #eee;
+    .settings-card h2 {
+      font-size:22px; margin-bottom:10px; color:#333;
     }
-    .dark-mode .screen {
-      background-color: #2b2b2b;
+    .settings-item {
+      display:flex; align-items:center;
+      justify-content:space-between; margin-top:20px;
     }
-    .dark-mode .header {
-      background-color: #b14444; /* Slightly darker red */
+    .settings-item label {
+      font-size:16px; color:#333;
     }
-    /* Footer is whiter in dark mode so icons are more visible */
-    .dark-mode .footer {
-      background-color: #f5f5f5;
+    .switch {
+      position:relative; display:inline-block;
+      width:52px; height:28px;
     }
-    .dark-mode .card {
-      background-color: #3c3c3c;
-      border-color: #555;
-      color: #eee;
+    .switch input {
+      opacity:0; width:0; height:0;
     }
-    .dark-mode .card-placeholder,
-    .dark-mode .qr-placeholder {
-      background-color: #555;
+    .slider {
+      position:absolute; top:0; left:0;
+      right:0; bottom:0;
+      background:#ccc; border-radius:14px;
+      transition:background 0.3s;
     }
-    .dark-mode .button {
-      background-color: #b14444;
+    .slider:before {
+      content:"";
+      position:absolute;
+      width:22px; height:22px;
+      left:3px; bottom:3px;
+      background:#fff;
+      border-radius:50%;
+      transition:transform 0.3s;
+    }
+    input:checked + .slider {
+      background:#b14444;
+    }
+    input:checked + .slider:before {
+      transform:translateX(24px);
+    }
+    #themeLabel {
+      margin-top:15px; font-weight:bold;
+      font-size:18px; color:#555; text-align:center;
+    }
+    .device.dark-mode .settings-card {
+      background:#3c3c3c; border:1px solid #555;
+      box-shadow:0 2px 5px rgba(0,0,0,0.4);
+    }
+    .device.dark-mode .settings-card h2,
+    .device.dark-mode .settings-item label,
+    .device.dark-mode #themeLabel {
+      color:#eee;
     }
   </style>
 </head>
 <body>
-  <!-- Global reservation array and current meal -->
+
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <div class="device">
+
+    <!-- Splash -->
+    <div id="splash" class="screen active">
+      <img src="UIC.PNG" alt="UIC Logo"/>
+    </div>
+
+    <!-- Home -->
+    <div id="home" class="screen">
+      <div class="header" onclick="showScreen('home')">
+        <img src="UIC.PNG" class="logo" alt="UIC"/>
+        <span class="header-text">UIC Food Share</span>
+      </div>
+      <div class="content">
+        <div class="home-info">
+          <p>Welcome to UIC Food Share!</p>
+          <p>Reduce waste, claim meals.</p>
+        </div>
+        <button class="button" onclick="showScreen('foodList')">Browse Available Meals</button>
+      </div>
+      <nav class="footer">
+        <button class="nav-button active" data-screen="home" onclick="showScreen('home')">
+          <img src="home.png" alt="Home"/>
+        </button>
+        <button class="nav-button" data-screen="reservations" onclick="showScreen('reservations')">
+          <img src="booking.png" alt="Reservations"/>
+        </button>
+        <button class="nav-button" data-screen="settings" onclick="showScreen('settings')">
+          <img src="settings.png" alt="Settings"/>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Available Meals -->
+    <div id="foodList" class="screen">
+      <div class="header" onclick="showScreen('home')">
+        <img src="UIC.PNG" class="logo" alt="UIC"/>
+        <span class="header-text">Available Meals</span>
+      </div>
+      <div class="content">
+        <!-- 1 -->
+        <div class="card">
+          <h3>Grilled Chicken</h3>
+          <p class="distance">Distance: 0.2 mi</p>
+          <p>Location: Student Center</p>
+          <p>Consume By: 2025-05-15</p>
+          <div class="card-placeholder">
+            <img src="food/grilled_chicken.jpg" alt="Grilled Chicken"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Grilled Chicken','Student Center','2025-05-15','0.2 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 2 -->
+        <div class="card">
+          <h3>Vegetarian Pasta</h3>
+          <p class="distance">Distance: 0.4 mi</p>
+          <p>Location: Library</p>
+          <p>Consume By: 2025-06-20</p>
+          <div class="card-placeholder">
+            <img src="food/vegetarian_pasta.jpeg" alt="Vegetarian Pasta"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Vegetarian Pasta','Library','2025-06-20','0.4 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 3 -->
+        <div class="card">
+          <h3>Caesar Salad</h3>
+          <p class="distance">Distance: 0.3 mi</p>
+          <p>Location: Cafeteria</p>
+          <p>Consume By: 2025-07-10</p>
+          <div class="card-placeholder">
+            <img src="food/caesar_salad.jpg" alt="Caesar Salad"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Caesar Salad','Cafeteria','2025-07-10','0.3 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 4 -->
+        <div class="card">
+          <h3>Beef Burger</h3>
+          <p class="distance">Distance: 0.6 mi</p>
+          <p>Location: Sports Complex</p>
+          <p>Consume By: 2025-08-05</p>
+          <div class="card-placeholder">
+            <img src="food/beef_burger.jpg" alt="Beef Burger"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Beef Burger','Sports Complex','2025-08-05','0.6 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 5 -->
+        <div class="card">
+          <h3>Vegan Wrap</h3>
+          <p class="distance">Distance: 0.5 mi</p>
+          <p>Location: Student Union</p>
+          <p>Consume By: 2025-09-12</p>
+          <div class="card-placeholder">
+            <img src="food/vegan_wrap.jpg" alt="Vegan Wrap"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Vegan Wrap','Student Union','2025-09-12','0.5 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 6 -->
+        <div class="card">
+          <h3>Fruit Bowl</h3>
+          <p class="distance">Distance: 0.7 mi</p>
+          <p>Location: Dormitory</p>
+          <p>Consume By: 2025-10-03</p>
+          <div class="card-placeholder">
+            <img src="food/fruit_bowl.jpg" alt="Fruit Bowl"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Fruit Bowl','Dormitory','2025-10-03','0.7 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 7 -->
+        <div class="card">
+          <h3>Sushi Platter</h3>
+          <p class="distance">Distance: 1.2 mi</p>
+          <p>Location: East Campus</p>
+          <p>Consume By: 2025-11-22</p>
+          <div class="card-placeholder">
+            <img src="food/sushi_platters.jpg" alt="Sushi Platter"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Sushi Platter','East Campus','2025-11-22','1.2 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 8 -->
+        <div class="card">
+          <h3>Tacos</h3>
+          <p class="distance">Distance: 0.9 mi</p>
+          <p>Location: West Campus</p>
+          <p>Consume By: 2025-12-01</p>
+          <div class="card-placeholder">
+            <img src="food/tacos.jpg" alt="Tacos"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Tacos','West Campus','2025-12-01','0.9 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 9 -->
+        <div class="card">
+          <h3>Mediterranean Platter</h3>
+          <p class="distance">Distance: 0.1 mi</p>
+          <p>Location: Central Hall</p>
+          <p>Consume By: 2025-04-18</p>
+          <div class="card-placeholder">
+            <img src="food/mediterranean_platter.jpg" alt="Mediterranean Platter"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Mediterranean Platter','Central Hall','2025-04-18','0.1 mi')">
+            Claim This Meal
+          </button>
+        </div>
+        <!-- 10 -->
+        <div class="card">
+          <h3>Chocolate Cake</h3>
+          <p class="distance">Distance: 0.2 mi</p>
+          <p>Location: Event Hall</p>
+          <p>Consume By: 2025-03-30</p>
+          <div class="card-placeholder">
+            <img src="food/chocolate_cake.jpg" alt="Chocolate Cake"/>
+          </div>
+          <button class="button"
+                  onclick="claimMeal('Chocolate Cake','Event Hall','2025-03-30','0.2 mi')">
+            Claim This Meal
+          </button>
+        </div>
+      </div>
+      <nav class="footer">
+        <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')"><img src="home.png" alt="Home"/></button>
+        <button class="nav-button" data-screen="reservations" onclick="showScreen('reservations')"><img src="booking.png" alt="Reservations"/></button>
+        <button class="nav-button" data-screen="settings" onclick="showScreen('settings')"><img src="settings.png" alt="Settings"/></button>
+      </nav>
+    </div>
+
+    <!-- Confirmation -->
+    <div id="confirmation" class="screen">
+      <div class="header" onclick="showScreen('home')">
+        <img src="UIC.PNG" class="logo" alt="UIC"/>
+        <span class="header-text">Meal Details</span>
+      </div>
+      <div class="content">
+        <div id="qrContainer"></div>
+        <div id="mealDetails"></div>
+        <button class="button" onclick="showScreen('reservations')">View Reservations</button>
+        <button class="button" onclick="showScreen('foodList')">Back to Available</button>
+      </div>
+      <nav class="footer">
+        <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')"><img src="home.png" alt="Home"/></button>
+        <button class="nav-button" data-screen="reservations" onclick="showScreen('reservations')"><img src="booking.png" alt="Reservations"/></button>
+        <button class="nav-button" data-screen="settings" onclick="showScreen('settings')"><img src="settings.png" alt="Settings"/></button>
+      </nav>
+    </div>
+
+    <!-- Reservations -->
+    <div id="reservations" class="screen">
+      <div class="header" onclick="showScreen('home')">
+        <img src="UIC.PNG" class="logo" alt="UIC"/>
+        <span class="header-text">My Reservations</span>
+      </div>
+      <div class="content" id="reservationsList">
+        <p style="text-align:center;color:#777;font-size:16px;">No reservations yet.</p>
+      </div>
+      <nav class="footer">
+        <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')"><img src="home.png" alt="Home"/></button>
+        <button class="nav-button active" data-screen="reservations" onclick="showScreen('reservations')"><img src="booking.png" alt="Reservations"/></button>
+        <button class="nav-button" data-screen="settings" onclick="showScreen('settings')"><img src="settings.png" alt="Settings"/></button>
+      </nav>
+    </div>
+
+    <!-- Settings -->
+    <div id="settings" class="screen">
+      <div class="header" onclick="showScreen('home')">
+        <img src="UIC.PNG" class="logo" alt="UIC"/>
+        <span class="header-text">Settings</span>
+      </div>
+      <div class="content">
+        <div class="settings-card">
+          <h2>Appearance</h2>
+          <div class="settings-item">
+            <label for="themeSwitch">Dark Mode</label>
+            <label class="switch">
+              <input type="checkbox" id="themeSwitch" onchange="toggleDarkMode()"/>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="themeLabel">Light Mode</div>
+        </div>
+      </div>
+      <nav class="footer">
+        <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')"><img src="home.png" alt="Home"/></button>
+        <button class="nav-button" data-screen="reservations" onclick="showScreen('reservations')"><img src="booking.png" alt="Reservations"/></button>
+        <button class="nav-button active" data-screen="settings" onclick="showScreen('settings')"><img src="settings.png" alt="Settings"/></button>
+      </nav>
+    </div>
+
+  </div><!-- /.device -->
+
   <script>
-    let reservations = [];
-    let currentMeal = null;
-
-    // Function to switch screens by ID
-    function showScreen(screenId) {
-      let screens = document.getElementsByClassName("screen");
-      for (let i = 0; i < screens.length; i++) {
-        screens[i].classList.remove("active");
-      }
-      document.getElementById(screenId).classList.add("active");
-
-      // Update dynamic content on Confirmation and Reservations screens
-      if (screenId === "confirmation") {
-        updateConfirmationScreen();
-      }
-      if (screenId === "reservations") {
-        updateReservationsScreen();
-      }
-    }
-
-    // Claim a meal from the Food Availability List
-    function claimMeal(name, location, consumeBy) {
-      currentMeal = { name, location, consumeBy };
-      reservations.push(currentMeal);
-      showScreen("confirmation");
-    }
-
-    // View details from the Reservations screen
-    function viewDetails(index) {
-      currentMeal = reservations[index];
-      showScreen("confirmation");
-    }
-
-    // Update the Confirmation screen with current meal details
-    function updateConfirmationScreen() {
-      let detailsContainer = document.getElementById("mealDetails");
-      if (currentMeal) {
-        detailsContainer.innerHTML = `
-          <h3 style="margin-bottom:10px;">${currentMeal.name}</h3>
-          <p style="font-size:14px;">Location: ${currentMeal.location}</p>
-          <p style="font-size:14px;">Consume By: ${currentMeal.consumeBy}</p>
-        `;
-      }
-    }
-
-    // Update the Reservations screen dynamically
-    function updateReservationsScreen() {
-      let listContainer = document.getElementById("reservationsList");
-      listContainer.innerHTML = "";
-      if (reservations.length === 0) {
-        listContainer.innerHTML = `<p style="text-align: center; color: #777; font-size: 16px;">No reservations yet.</p>`;
-      } else {
-        reservations.forEach((meal, index) => {
-          let card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `
-            <h3>${meal.name}</h3>
-            <p>Location: ${meal.location}</p>
-            <p>Consume By: ${meal.consumeBy}</p>
-            <button class="button" onclick="viewDetails(${index})">View Details</button>
-          `;
-          listContainer.appendChild(card);
+    // Splash → fade then show home
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash');
+        splash.classList.add('fade-out');
+        splash.addEventListener('transitionend', () => {
+          splash.style.display = 'none';
+          showScreen('home');
         });
-      }
+      }, 600);
+    });
+
+    // Core navigation & reservation logic
+    let reservations = [], currentMeal = null;
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav-button')
+        .forEach(b => b.classList.toggle('active', b.dataset.screen === id));
+      if (id === 'confirmation') renderConfirmationQR();
+      if (id === 'reservations') updateReservations();
     }
 
-    // Toggle Dark Mode / Light Mode
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-      const themeLabel = document.getElementById('themeLabel');
-      if (document.body.classList.contains('dark-mode')) {
-        themeLabel.innerText = 'Dark Mode';
-      } else {
-        themeLabel.innerText = 'Light Mode';
+    function claimMeal(name, location, consumeBy, distance) {
+      currentMeal = { name, location, consumeBy, distance };
+      reservations.push(currentMeal);
+      showScreen('confirmation');
+    }
+
+    function viewDetails(i) {
+      currentMeal = reservations[i];
+      showScreen('confirmation');
+    }
+
+    function removeReservation(i) {
+      reservations.splice(i, 1);
+      updateReservations();
+    }
+
+    function renderConfirmationQR() {
+      document.getElementById('mealDetails').innerHTML = `
+        <h3>${currentMeal.name}</h3>
+        <p>Location: ${currentMeal.location}</p>
+        <p>Consume By: ${currentMeal.consumeBy}</p>
+        <p><em>Show this to the volunteer for check-in</em></p>`;
+      const container = document.getElementById('qrContainer');
+      container.innerHTML = '';
+      new QRCode(container, {
+        text: JSON.stringify(currentMeal),
+        width: 200,
+        height: 200
+      });
+    }
+
+    function updateReservations() {
+      const list = document.getElementById('reservationsList');
+      list.innerHTML = '';
+      if (!reservations.length) {
+        list.innerHTML = `<p style="text-align:center;color:#777;font-size:16px;">
+                            No reservations yet.
+                          </p>`;
+        return;
       }
+      reservations.forEach((m, i) => {
+        const diff = new Date(m.consumeBy) - Date.now();
+        const status = diff > 0 ? 'Pending Pickup' : 'Expired';
+        const days = Math.max(0, Math.floor(diff / 86400000));
+        const hrs = Math.max(0, Math.floor((diff % 86400000) / 3600000));
+        const countdown = diff > 0
+          ? `${days}d ${hrs}h left`
+          : 'Expired';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="status">${status}</div>
+          <div class="countdown">${countdown}</div>
+          <h3>${m.name}</h3>
+          <p>Location: ${m.location}</p>
+          <p>Consume By: ${m.consumeBy}</p>
+          <div class="reservation-actions">
+            <button class="button view-btn" onclick="viewDetails(${i})">
+              View Details
+            </button>
+            <button class="remove-btn" onclick="removeReservation(${i})">
+              <img src="trash.png" alt="Remove"/>
+            </button>
+          </div>`;
+        list.appendChild(card);
+      });
+    }
+
+    // Toggle Dark/Light Mode
+    function toggleDarkMode() {
+      const dev = document.querySelector('.device');
+      const lbl = document.getElementById('themeLabel');
+      dev.classList.toggle('dark-mode');
+      lbl.textContent = dev.classList.contains('dark-mode')
+        ? 'Dark Mode'
+        : 'Light Mode';
     }
   </script>
-
-  <!-- Home Screen (Welcome) -->
-  <div id="home" class="screen active">
-    <div class="header" onclick="showScreen('home')">
-      <img src="UIC.PNG" alt="UIC Logo" class="logo" />
-      <span class="header-text">UIC Food Share</span>
-    </div>
-    <div class="content center" style="flex-direction: column; text-align: center;">
-      <div class="home-info">
-        <p>
-          <strong>Welcome to UIC Food Share!</strong> Discover leftover meals from campus events, reduce food waste,
-          and help fellow students. Explore available meals, claim them, and pick them up at designated locations.
-        </p>
-      </div>
-      <button class="button" style="padding: 20px 30px; font-size: 20px;" onclick="showScreen('foodList')">
-        See Available Food
-      </button>
-    </div>
-    <div class="footer">
-      <button class="nav-button" onclick="showScreen('foodList')">
-        <img src="home.png" alt="Home" />
-      </button>
-      <button class="nav-button" onclick="showScreen('reservations')">
-        <img src="booking.png" alt="Reservations" />
-      </button>
-      <button class="nav-button" onclick="showScreen('settings')">
-        <img src="settings.png" alt="Settings" />
-      </button>
-    </div>
-  </div>
-
-  <!-- Food Availability List Screen -->
-  <div id="foodList" class="screen">
-    <div class="header" onclick="showScreen('home')">
-      <img src="UIC.PNG" alt="UIC Logo" class="logo" />
-      <span class="header-text">UIC Food Share</span>
-    </div>
-    <div class="content">
-      <!-- 10 Food Cards with dates and images -->
-      <div class="card">
-        <h3>Grilled Chicken</h3>
-        <p>Location: Student Center</p>
-        <p>Consume By: 05/15/2025</p>
-        <div class="card-placeholder">
-          <img src="food/grilled_chicken.jpg" alt="Grilled Chicken" />
-        </div>
-        <button class="button" onclick="claimMeal('Grilled Chicken','Student Center','05/15/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Vegetarian Pasta</h3>
-        <p>Location: Library</p>
-        <p>Consume By: 06/20/2025</p>
-        <div class="card-placeholder">
-          <img src="food/vegetarian_pasta.jpeg" alt="Vegetarian Pasta" />
-        </div>
-        <button class="button" onclick="claimMeal('Vegetarian Pasta','Library','06/20/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Caesar Salad</h3>
-        <p>Location: Cafeteria</p>
-        <p>Consume By: 07/10/2025</p>
-        <div class="card-placeholder">
-          <img src="food/caesar_salad.jpg" alt="Caesar Salad" />
-        </div>
-        <button class="button" onclick="claimMeal('Caesar Salad','Cafeteria','07/10/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Beef Burger</h3>
-        <p>Location: Sports Complex</p>
-        <p>Consume By: 08/05/2025</p>
-        <div class="card-placeholder">
-          <img src="food/beef_burger.jpg" alt="Beef Burger" />
-        </div>
-        <button class="button" onclick="claimMeal('Beef Burger','Sports Complex','08/05/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Vegan Wrap</h3>
-        <p>Location: Student Union</p>
-        <p>Consume By: 09/12/2025</p>
-        <div class="card-placeholder">
-          <img src="food/vegan_wrap.jpg" alt="Vegan Wrap" />
-        </div>
-        <button class="button" onclick="claimMeal('Vegan Wrap','Student Union','09/12/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Fruit Bowl</h3>
-        <p>Location: Dormitory</p>
-        <p>Consume By: 10/03/2025</p>
-        <div class="card-placeholder">
-          <img src="food/fruit_bowl.jpg" alt="Fruit Bowl" />
-        </div>
-        <button class="button" onclick="claimMeal('Fruit Bowl','Dormitory','10/03/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Sushi Platter</h3>
-        <p>Location: East Campus</p>
-        <p>Consume By: 11/22/2025</p>
-        <div class="card-placeholder">
-          <img src="food/sushi_platters.jpg" alt="Sushi Platter" />
-        </div>
-        <button class="button" onclick="claimMeal('Sushi Platter','East Campus','11/22/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Tacos</h3>
-        <p>Location: West Campus</p>
-        <p>Consume By: 12/01/2025</p>
-        <div class="card-placeholder">
-          <img src="food/tacos.jpg" alt="Tacos" />
-        </div>
-        <button class="button" onclick="claimMeal('Tacos','West Campus','12/01/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Mediterranean Platter</h3>
-        <p>Location: Central Hall</p>
-        <p>Consume By: 04/18/2025</p>
-        <div class="card-placeholder">
-          <img src="food/mediterranean_platter.jpg" alt="Mediterranean Platter" />
-        </div>
-        <button class="button" onclick="claimMeal('Mediterranean Platter','Central Hall','04/18/2025')">Claim This Meal</button>
-      </div>
-      <div class="card">
-        <h3>Chocolate Cake</h3>
-        <p>Location: Event Hall</p>
-        <p>Consume By: 03/30/2025</p>
-        <div class="card-placeholder">
-          <img src="food/chocolate_cake.jpg" alt="Chocolate Cake" />
-        </div>
-        <button class="button" onclick="claimMeal('Chocolate Cake','Event Hall','03/30/2025')">Claim This Meal</button>
-      </div>
-    </div>
-    <div class="footer">
-      <button class="nav-button" onclick="showScreen('foodList')">
-        <img src="home.png" alt="Home" />
-      </button>
-      <button class="nav-button" onclick="showScreen('reservations')">
-        <img src="booking.png" alt="Reservations" />
-      </button>
-      <button class="nav-button" onclick="showScreen('settings')">
-        <img src="settings.png" alt="Settings" />
-      </button>
-    </div>
-  </div>
-
-  <!-- Meal Confirmation (QR Code) Screen -->
-  <div id="confirmation" class="screen">
-    <div class="header" onclick="showScreen('home')">
-      <img src="UIC.PNG" alt="UIC Logo" class="logo" />
-      <span class="header-text">UIC Food Share</span>
-    </div>
-    <div class="content" style="text-align: center;">
-      <div class="qr-placeholder">
-        <span>QR Code</span>
-      </div>
-      <!-- Dynamic meal details -->
-      <div id="mealDetails" style="margin-bottom: 20px; font-size: 14px; text-align: center;"></div>
-      <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-        <button class="button" onclick="showScreen('reservations')">Claimed Meals</button>
-        <button class="button" onclick="showScreen('foodList')">Back to Food List</button>
-      </div>
-    </div>
-    <div class="footer">
-      <button class="nav-button" onclick="showScreen('foodList')">
-        <img src="home.png" alt="Home" />
-      </button>
-      <button class="nav-button" onclick="showScreen('reservations')">
-        <img src="booking.png" alt="Reservations" />
-      </button>
-      <button class="nav-button" onclick="showScreen('settings')">
-        <img src="settings.png" alt="Settings" />
-      </button>
-    </div>
-  </div>
-
-  <!-- My Reservations Screen -->
-  <div id="reservations" class="screen">
-    <div class="header" onclick="showScreen('home')">
-      <img src="UIC.PNG" alt="UIC Logo" class="logo" />
-      <span class="header-text">UIC Food Share</span>
-    </div>
-    <div class="content" id="reservationsList">
-      <p style="text-align: center; color: #777; font-size: 16px;">No reservations yet.</p>
-    </div>
-    <div class="footer">
-      <button class="nav-button" onclick="showScreen('foodList')">
-        <img src="home.png" alt="Home" />
-      </button>
-      <button class="nav-button" onclick="showScreen('reservations')">
-        <img src="booking.png" alt="Reservations" />
-      </button>
-      <button class="nav-button" onclick="showScreen('settings')">
-        <img src="settings.png" alt="Settings" />
-      </button>
-    </div>
-  </div>
-
-  <!-- Settings Screen with Dark/Light Mode Toggle -->
-  <div id="settings" class="screen">
-    <div class="header" onclick="showScreen('home')">
-      <img src="UIC.PNG" alt="UIC Logo" class="logo" />
-      <span class="header-text">UIC Food Share</span>
-    </div>
-    <div class="content center" style="flex-direction: column; text-align: center;">
-      <h2 style="margin-bottom: 20px;">Settings</h2>
-      <div class="settings-option" style="cursor: pointer;" onclick="document.getElementById('themeSwitch').click()">
-        <label for="themeSwitch">Theme</label>
-        <input type="checkbox" id="themeSwitch" onchange="toggleDarkMode()" onclick="event.stopPropagation()" style="cursor: pointer;" />
-        <span id="themeLabel" style="margin-left: 10px; cursor: pointer;">Light Mode</span>
-      </div>
-    </div>
-    <div class="footer">
-      <button class="nav-button" onclick="showScreen('foodList')">
-        <img src="home.png" alt="Home" />
-      </button>
-      <button class="nav-button" onclick="showScreen('reservations')">
-        <img src="booking.png" alt="Reservations" />
-      </button>
-      <button class="nav-button" onclick="showScreen('settings')">
-        <img src="settings.png" alt="Settings" />
-      </button>
-    </div>
-  </div>
-
-  <!-- Error Message Screen -->
-  <div id="error" class="screen">
-    <div class="header">
-      <img src="UIC.PNG" alt="UIC Logo" class="logo" />
-      <span class="header-text">UIC Food Share</span>
-    </div>
-    <div class="content center" style="flex-direction: column; text-align: center;">
-      <p style="font-size:16px; font-weight:bold; color:#721c24; margin-bottom: 20px;">
-        Oops! This meal has already been claimed.
-      </p>
-      <button class="button" onclick="showScreen('foodList')">Try Another Meal</button>
-    </div>
-  </div>
 </body>
 </html>
