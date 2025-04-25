@@ -25,8 +25,7 @@
       top: 70px; left: 20px; right: 20px;
       background: #4caf50; color: #fff;
       padding: 10px; border-radius: 5px;
-      text-align: center;
-      opacity: 0; transition: opacity 0.3s;
+      text-align: center; opacity: 0; transition: opacity 0.3s;
       pointer-events: none; z-index: 100;
     }
     .feedback.show { opacity: 1; }
@@ -84,10 +83,7 @@
       transition:background 0.3s; min-width:200px; line-height:1;
     }
     .button:disabled { background:#aaa; cursor:default; }
-
-    .card .button {
-      display: block; margin: 10px auto 0;
-    }
+    .card .button { display:block; margin:10px auto 0; }
 
     /* Cards */
     .card {
@@ -124,11 +120,10 @@
       width:16px; height:16px; filter:brightness(0) invert(1);
     }
 
-    /* Meal Details centering and button width */
-    #confirmation .content { text-align: center; }
+    /* Meal Details centering */
+    #confirmation .content { text-align:center; }
     #confirmation .content .button {
-      display: block; width:80%; max-width:240px;
-      margin:10px auto;
+      display:block; width:80%; max-width:240px; margin:10px auto;
     }
 
     /* “Meal claimed successfully!” banner */
@@ -206,6 +201,22 @@
 
     /* margin between Save Changes button and Appearance */
     #settings .content .button { margin: 10px 0 20px; }
+
+    /* Help & Instructions list styling */
+    #help .content h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.75em;
+    }
+    #help .content ul {
+      padding-left: 1.4em;
+      margin-bottom: 1em;
+      list-style-type: disc;
+    }
+    #help .content li {
+      margin-bottom: 0.6em;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -365,6 +376,8 @@
           </div>
           <div id="themeLabel">Light Mode</div>
         </div>
+        <!-- Help & Instructions -->
+        <button class="button" onclick="showScreen('help')">Help &amp; Instructions</button>
       </div>
       <nav class="footer">
         <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')">
@@ -374,6 +387,36 @@
           <img src="booking.png" alt="Reservations"/>
         </button>
         <button class="nav-button active" data-screen="settings" onclick="showScreen('settings')">
+          <img src="settings.png" alt="Settings"/>
+        </button>
+      </nav>
+    </div>
+
+    <!-- HELP & INSTRUCTIONS -->
+    <div id="help" class="screen">
+      <div class="header" onclick="showScreen('settings')">
+        <img src="UIC.PNG" class="logo" alt="UIC"/>
+        <span class="header-text">Help &amp; Instructions</span>
+      </div>
+      <div class="content">
+        <h2>How It Works</h2>
+        <ul>
+          <li>Tap “Browse Available Meals” to see open meals nearby.</li>
+          <li>Tap “Claim This Meal” to reserve it; you’ll get a QR code.</li>
+          <li>Show your QR code to the volunteer to pick up your meal.</li>
+          <li>Manage your claimed meals under “My Claimed Meals.”</li>
+          <li>Remove expired or unwanted reservations in “My Reservations.”</li>
+          <li>Use Settings to update your profile, toggle dark mode, or view this help page.</li>
+        </ul>
+      </div>
+      <nav class="footer">
+        <button class="nav-button" data-screen="home" onclick="showScreen('home')">
+          <img src="home.png" alt="Home"/>
+        </button>
+        <button class="nav-button" data-screen="reservations" onclick="showScreen('reservations')">
+          <img src="booking.png" alt="Reservations"/>
+        </button>
+        <button class="nav-button" data-screen="settings" onclick="showScreen('settings')">  
           <img src="settings.png" alt="Settings"/>
         </button>
       </nav>
@@ -415,14 +458,12 @@
       document.getElementById('searchInput').addEventListener('input', renderFoodList);
       document.getElementById('sortSelect').addEventListener('change', renderFoodList);
 
-      // load Profile fields
       ['name','uin','netid'].forEach(key => {
         const inp = document.getElementById(key + 'Input');
         const saved = localStorage.getItem(key);
         if (saved) inp.value = saved;
       });
 
-      // UIN validation
       const uinInp = document.getElementById('uinInput');
       uinInp.addEventListener('blur', () => {
         if (uinInp.value && uinInp.value.length !== 9) {
@@ -442,7 +483,6 @@
       if (id==='home') updateWelcome();
       if (id==='foodList') renderFoodList();
       if (id==='confirmation') {
-        // clear previous banner
         document.getElementById('claimMsg').style.display = 'none';
         renderConfirmationQR();
       }
@@ -496,7 +536,6 @@
       setTimeout(()=>{
         renderFoodList();
         showScreen('confirmation');
-        // show the green banner
         document.getElementById('claimMsg').style.display='block';
       },300);
     }
@@ -504,10 +543,7 @@
     function renderConfirmationQR() {
       const con=document.getElementById('qrContainer');
       con.innerHTML='';
-      new QRCode(con,{
-        text: JSON.stringify(currentMeal),
-        width:200,height:200
-      });
+      new QRCode(con,{ text: JSON.stringify(currentMeal), width:200, height:200 });
       document.getElementById('mealDetails').innerHTML=`
         <h3>${currentMeal.name}</h3>
         <p>Location: ${currentMeal.location}</p>
@@ -574,7 +610,6 @@
       l.textContent=d.classList.contains('dark-mode')?'Dark Mode':'Light Mode';
     }
 
-    // Save Profile changes
     function saveProfile() {
       ['name','uin','netid'].forEach(key=>{
         const val=document.getElementById(key+'Input').value;
