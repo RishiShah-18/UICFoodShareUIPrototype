@@ -5,49 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UIC Food Share – Full Prototype</title>
   <style>
-    /* ───────────────────────────────────────────────────────────────────────── */
     /* Core Reset */
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-
-    /* Center phone frame horizontally, allow vertical scrolling */
+    * { box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
     body {
-      background-color: #f5f5f5;
-      display: flex; justify-content: center;
-      padding: 20px 0;
+      background: #f5f5f5;
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh;
+    }
+    .device {
+      position: relative; width:375px; height:750px;
+      background:#fff; border-radius:10px;
+      box-shadow:0 4px 8px rgba(0,0,0,0.1);
+      overflow:hidden;
     }
 
-    /* Fixed-width “device”, full height inside page */
-    .device {
-      position: relative;
-      width: 375px;
-      background: #fff; border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      overflow: hidden;
+    /* Global Feedback toast */
+    .feedback {
+      position: absolute;
+      top: 70px; left: 20px; right: 20px;
+      background: #4caf50; color: #fff;
+      padding: 10px; border-radius: 5px;
+      text-align: center;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; z-index: 100;
     }
+    .feedback.show { opacity: 1; }
 
     /* Splash */
     #splash {
-      position: absolute; top:0; left:0;
-      width:100%; height:100%;
+      position:absolute; top:0; left:0; width:100%; height:100%;
       display:flex; align-items:center; justify-content:center;
-      background:#fff; z-index:10;
-      transition:opacity 1s ease;
+      background:#fff; z-index:10; transition:opacity 1s ease;
     }
     #splash.fade-out { opacity:0; }
     #splash img { width:120px; }
 
     /* Screens */
-    .screen {
-      position:relative;
-      width:100%; height:100%;
-      display:none;
-    }
+    .screen { position:absolute; top:0; left:0; width:100%; height:100%; display:none; }
     .screen.active { display:block; }
 
     /* Header */
     .header {
-      width:100%; height:60px;
-      background:#df6f6f; color:#fff;
+      width:100%; height:60px; background:#df6f6f; color:#fff;
       display:flex; align-items:center; padding:0 10px;
       border-top-left-radius:10px; border-top-right-radius:10px;
       cursor:pointer;
@@ -55,37 +54,46 @@
     .header img.logo { width:40px; margin-right:10px; }
     .header .header-text { font-size:20px; font-weight:bold; }
 
-    /* Content area */
+    /* Content */
     .content {
-      padding:20px;
-      height:calc(100vh - 120px - 40px);
-      overflow-y:auto;
+      position: relative;
+      padding:20px; height:calc(100% - 120px); overflow-y:auto;
     }
-
-    /* Home */
     #home .content {
-      display:flex; flex-direction:column;
-      justify-content:center; align-items:center;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
     }
     .home-info { text-align:center; margin-bottom:8px; }
     .home-info p { margin-bottom:6px; font-size:18px; font-weight:bold; }
 
+    /* Search & filter bar */
+    .search-filter {
+      display:flex; gap:8px; margin-bottom:12px;
+    }
+    .search-filter input,
+    .search-filter select {
+      padding:8px; border:1px solid #ddd; border-radius:5px;
+      font-size:14px;
+    }
+    .search-filter input { flex:1; }
+
     /* Buttons */
     .button {
       display:inline-block; padding:15px 25px;
-      background:#df6f6f; color:#fff;
-      border:none; border-radius:5px;
+      background:#df6f6f; color:#fff; border:none; border-radius:5px;
       cursor:pointer; font-size:20px; font-weight:bold;
       transition:background 0.3s; min-width:200px; line-height:1;
     }
     .button:disabled { background:#aaa; cursor:default; }
 
+    .card .button {
+      display: block; margin: 10px auto 0;
+    }
+
     /* Cards */
     .card {
       border:1px solid #ddd; border-radius:10px;
       padding:15px; margin-bottom:15px;
-      box-shadow:0 2px 5px rgba(0,0,0,0.1);
-      background:#fff;
+      box-shadow:0 2px 5px rgba(0,0,0,0.1); background:#fff;
     }
     .card h3 { margin-bottom:5px; font-size:18px; font-weight:bold; }
     .card p { margin-bottom:5px; font-size:14px; }
@@ -97,90 +105,96 @@
     }
     .card-placeholder img { width:100%; height:100%; object-fit:cover; }
 
-    /* Status & countdown */
-    .status { font-weight:bold; margin-bottom:5px; }
-    .countdown { font-size:13px; color:#555; margin-bottom:10px; }
-
-    /* QR & feedback */
-    #qrContainer { width:200px; height:200px; margin:10px auto; }
-    #feedbackMessage { color:green; font-weight:bold; margin-bottom:10px; }
-
     /* Reservation actions */
     .reservation-actions {
       display:flex; gap:8px; margin-top:10px;
     }
     .reservation-actions .view-btn {
       flex:1; height:48px;
-      display:flex; align-items:center; justify-content:center;
+      background:#df6f6f; color:#fff; border:none; border-radius:5px;
+      cursor:pointer; font-size:16px; font-weight:bold;
     }
     .reservation-actions .remove-btn {
       flex:0 0 48px; height:48px;
-      border:none; border-radius:5px;
-      background:#d32f2f;
+      background:#d32f2f; border:none; border-radius:5px;
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
     }
     .reservation-actions .remove-btn img {
-      width:24px; height:24px;
-      filter: brightness(0) invert(1);
+      width:16px; height:16px; filter:brightness(0) invert(1);
     }
+
+    /* Meal Details centering and button width */
+    #confirmation .content { text-align: center; }
+    #confirmation .content .button {
+      display: block; width:80%; max-width:240px;
+      margin:10px auto;
+    }
+
+    /* “Meal claimed successfully!” banner */
+    .claim-msg {
+      color: #4caf50;
+      font-weight: bold;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    /* Status & Countdown */
+    .status { font-weight:bold; margin-bottom:5px; }
+    .countdown { font-size:13px; color:#555; margin-bottom:10px; }
+
+    /* QR Container */
+    #qrContainer { width:200px; height:200px; margin:0 auto 10px; }
 
     /* Footer / nav */
     .footer {
       width:100%; height:60px; background:#f0f0f0;
       display:flex; justify-content:space-around; align-items:center;
-      position:sticky; bottom:0;
+      position:absolute; bottom:0;
       border-bottom-left-radius:10px; border-bottom-right-radius:10px;
     }
-    .nav-button { background:none; border:none; cursor:pointer; opacity:0.6; padding:8px; }
-    .nav-button.active {
-      opacity:1;
-      background:#df6f6f; border-radius:5px;
-    }
+    .nav-button { background:none; border:none; cursor:pointer; opacity:0.6; }
+    .nav-button.active { opacity:1; }
     .nav-button img { width:24px; height:24px; }
 
-    /* Settings */
-    .settings-card {
-      width:90%; max-width:320px;
-      background:#fff; border-radius:10px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.1);
-      padding:20px; margin-bottom:20px;
-    }
-    .settings-card h2 {
-      font-size:22px; margin-bottom:10px; color:#333;
-    }
-    .settings-item {
-      display:flex; align-items:center;
-      justify-content:space-between; margin-top:20px;
-    }
-    .settings-item label { font-size:16px; color:#333; }
-    .settings-item input {
-      flex:1; margin-left:10px; padding:5px;
-      border:1px solid #ddd; border-radius:5px;
-    }
-    #themeLabel {
-      margin-top:15px; font-weight:bold;
-      font-size:18px; color:#555; text-align:center;
-    }
-
-    /* Confirmation button spacing */
-    #confirmation .content button + button {
-      margin-top:10px;
-    }
-
-    /* ── Dark mode overrides ─────────────────────────────────────────────────── */
+    /* Dark mode tweaks */
     .device.dark-mode .screen { background:#2b2b2b; color:#eee; }
     .device.dark-mode .header { background:#b14444; }
+    .device.dark-mode .card p.distance { color: #ded8d8; }
     .device.dark-mode .card {
       background:#3c3c3c; border-color:#555; color:#eee;
     }
-    .device.dark-mode .button {
-      background:#b14444; color:#fff;
+    .device.dark-mode .button { background:#b14444; color:#fff; }
+
+    /* Settings */
+    #settings .content { display:flex; flex-direction:column; align-items:center; padding-top:40px; }
+    .settings-card {
+      width:90%; max-width:320px; background:#fff;
+      border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      padding:20px; margin-bottom:20px;
     }
-    .device.dark-mode .content h2,
-    .device.dark-mode .content p,
-    .device.dark-mode .home-info p {
-      color:#eee;
+    .settings-card h2 { font-size:22px; margin-bottom:10px; color:#333; }
+    .settings-item {
+      display:flex; align-items:center; justify-content:space-between; margin-top:20px;
+    }
+    .settings-item label { font-size:16px; color:#333; }
+    .switch {
+      position:relative; display:inline-block; width:52px; height:28px;
+    }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider {
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      background:#ccc; border-radius:14px; transition:background 0.3s;
+    }
+    .slider:before {
+      content:""; position:absolute; width:22px; height:22px;
+      left:3px; bottom:3px; background:#fff; border-radius:50%;
+      transition:transform 0.3s;
+    }
+    input:checked + .slider { background:#b14444; }
+    input:checked + .slider:before { transform:translateX(24px); }
+    #themeLabel {
+      margin-top:15px; font-weight:bold; font-size:18px; color:#555; text-align:center;
     }
     .device.dark-mode .settings-card {
       background:#3c3c3c; border:1px solid #555;
@@ -188,28 +202,27 @@
     }
     .device.dark-mode .settings-card h2,
     .device.dark-mode .settings-item label,
-    .device.dark-mode #themeLabel {
-      color:#eee;
-    }
-    /* <— fix countdown legibility */
-    .device.dark-mode .countdown {
-      color: #ccc;
-    }
+    .device.dark-mode #themeLabel { color:#eee; }
+
+    /* margin between Save Changes button and Appearance */
+    #settings .content .button { margin: 10px 0 20px; }
   </style>
 </head>
 <body>
 
-  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <div class="device">
 
-    <!-- Splash -->
+    <!-- Global feedback toast -->
+    <div id="feedback" class="feedback"></div>
+
+    <!-- SPLASH -->
     <div id="splash" class="screen active">
       <img src="UIC.PNG" alt="UIC Logo"/>
     </div>
 
-    <!-- Home -->
+    <!-- HOME -->
     <div id="home" class="screen">
       <div class="header" onclick="showScreen('home')">
         <img src="UIC.PNG" class="logo" alt="UIC"/>
@@ -217,12 +230,12 @@
       </div>
       <div class="content">
         <div class="home-info">
-          <p id="greeting">Welcome to UIC Food Share!</p>
+          <p id="welcomeText">Welcome, User!</p>
           <p>Reduce waste, claim meals.</p>
         </div>
         <button class="button" onclick="showScreen('foodList')">Browse Available Meals</button>
       </div>
-      <div class="footer">
+      <nav class="footer">
         <button class="nav-button active" data-screen="home" onclick="showScreen('home')">
           <img src="home.png" alt="Home"/>
         </button>
@@ -232,24 +245,27 @@
         <button class="nav-button" data-screen="settings" onclick="showScreen('settings')">
           <img src="settings.png" alt="Settings"/>
         </button>
-      </div>
+      </nav>
     </div>
 
-    <!-- Available Meals -->
+    <!-- AVAILABLE MEALS -->
     <div id="foodList" class="screen">
       <div class="header" onclick="showScreen('home')">
         <img src="UIC.PNG" class="logo" alt="UIC"/>
         <span class="header-text">Available Meals</span>
       </div>
       <div class="content">
-        <input id="filterInput" type="text" placeholder="Search meals…" style="width:100%;padding:8px;margin-bottom:10px;border-radius:5px;border:1px solid #ddd;">
-        <select id="sortSelect" style="width:100%;padding:8px;margin-bottom:15px;border-radius:5px;border:1px solid #ddd;">
-          <option value="distance">Sort by Distance</option>
-          <option value="consumeBy">Sort by Expiry Date</option>
-        </select>
-        <div id="foodListContainer"></div>
+        <div class="search-filter">
+          <input type="text" id="searchInput" placeholder="Search meals…">
+          <select id="sortSelect">
+            <option value="">Sort by</option>
+            <option value="expiration">Expiration Date</option>
+            <option value="distance">Distance</option>
+          </select>
+        </div>
+        <div id="foodListContent"></div>
       </div>
-      <div class="footer">
+      <nav class="footer">
         <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')">
           <img src="home.png" alt="Home"/>
         </button>
@@ -259,24 +275,26 @@
         <button class="nav-button" data-screen="settings" onclick="showScreen('settings')">
           <img src="settings.png" alt="Settings"/>
         </button>
-      </div>
+      </nav>
     </div>
 
-    <!-- Confirmation / Meal Details -->
+    <!-- CONFIRMATION -->
     <div id="confirmation" class="screen">
       <div class="header" onclick="showScreen('home')">
         <img src="UIC.PNG" class="logo" alt="UIC"/>
         <span class="header-text">Meal Details</span>
       </div>
       <div class="content">
-        <div id="feedbackMessage">Meal claimed successfully!</div>
+        <!-- hidden success banner -->
+        <p id="claimMsg" class="claim-msg" style="display:none;">
+          Meal claimed successfully!
+        </p>
         <div id="qrContainer"></div>
         <div id="mealDetails"></div>
-        <!-- renamed here -->
         <button class="button" onclick="showScreen('reservations')">My Claimed Meals</button>
         <button class="button" onclick="showScreen('foodList')">Back to Available</button>
       </div>
-      <div class="footer">
+      <nav class="footer">
         <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')">
           <img src="home.png" alt="Home"/>
         </button>
@@ -286,10 +304,10 @@
         <button class="nav-button" data-screen="settings" onclick="showScreen('settings')">
           <img src="settings.png" alt="Settings"/>
         </button>
-      </div>
+      </nav>
     </div>
 
-    <!-- Reservations -->
+    <!-- RESERVATIONS -->
     <div id="reservations" class="screen">
       <div class="header" onclick="showScreen('home')">
         <img src="UIC.PNG" class="logo" alt="UIC"/>
@@ -298,7 +316,7 @@
       <div class="content" id="reservationsList">
         <p style="text-align:center;color:#777;font-size:16px;">No reservations yet.</p>
       </div>
-      <div class="footer">
+      <nav class="footer">
         <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')">
           <img src="home.png" alt="Home"/>
         </button>
@@ -308,39 +326,34 @@
         <button class="nav-button" data-screen="settings" onclick="showScreen('settings')">
           <img src="settings.png" alt="Settings"/>
         </button>
-      </div>
+      </nav>
     </div>
 
-    <!-- Help / Instructions -->
-    <div id="help" class="screen">
-      <div class="header" onclick="showScreen('settings')">
-        <img src="UIC.PNG" class="logo" alt="UIC"/>
-        <span class="header-text">Help & Instructions</span>
-      </div>
-      <div class="content">
-        <p style="margin-bottom:10px;">Browse available meals, claim one, and it moves to your reservations. Use the search box or sort dropdown to find meals quickly. Tap “My Claimed Meals” to view your QR or remove an expired claim. Toggle Dark Mode in Settings and enter your name to personalize the greeting.</p>
-        <button class="button" onclick="showScreen('settings')">Back to Settings</button>
-      </div>
-      <div class="footer">
-        <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')">
-          <img src="home.png" alt="Home"/>
-        </button>
-        <button class="nav-button" data-screen="reservations" onclick="showScreen('reservations')">
-          <img src="booking.png" alt="Reservations"/>
-        </button>
-        <button class="nav-button" data-screen="settings" onclick="showScreen('settings')">
-          <img src="settings.png" alt="Settings"/>
-        </button>
-      </div>
-    </div>
-
-    <!-- Settings -->
+    <!-- SETTINGS -->
     <div id="settings" class="screen">
       <div class="header" onclick="showScreen('home')">
         <img src="UIC.PNG" class="logo" alt="UIC"/>
         <span class="header-text">Settings</span>
       </div>
       <div class="content">
+        <!-- Profile -->
+        <div class="settings-card">
+          <h2>Profile</h2>
+          <div class="settings-item">
+            <label for="nameInput">Name</label>
+            <input id="nameInput" type="text" placeholder="Your name">
+          </div>
+          <div class="settings-item">
+            <label for="uinInput">UIN</label>
+            <input id="uinInput" type="text" placeholder="000000000" maxlength="9">
+          </div>
+          <div class="settings-item">
+            <label for="netidInput">NetID</label>
+            <input id="netidInput" type="text" placeholder="abc1234">
+          </div>
+        </div>
+        <button class="button" onclick="saveProfile()">Save Changes</button>
+        <!-- Appearance -->
         <div class="settings-card">
           <h2>Appearance</h2>
           <div class="settings-item">
@@ -352,16 +365,8 @@
           </div>
           <div id="themeLabel">Light Mode</div>
         </div>
-        <div class="settings-card">
-          <h2>Profile</h2>
-          <div class="settings-item">
-            <label for="userName">Name</label>
-            <input type="text" id="userName" placeholder="Enter your name"/>
-          </div>
-        </div>
-        <button class="button" onclick="showScreen('help')">Help / Instructions</button>
       </div>
-      <div class="footer">
+      <nav class="footer">
         <button class="nav-button" data-screen="foodList" onclick="showScreen('foodList')">
           <img src="home.png" alt="Home"/>
         </button>
@@ -371,12 +376,31 @@
         <button class="nav-button active" data-screen="settings" onclick="showScreen('settings')">
           <img src="settings.png" alt="Settings"/>
         </button>
-      </div>
+      </nav>
     </div>
-  </div><!-- /.device -->
+
+  </div>
 
   <script>
-    // Splash → fade then home
+    const meals = [
+      { name:'Grilled Chicken',      location:'Student Center', consumeBy:'2025-05-15', distance:'0.2 mi', img:'food/grilled_chicken.jpg' },
+      { name:'Vegetarian Pasta',     location:'Library',        consumeBy:'2025-06-20', distance:'0.4 mi', img:'food/vegetarian_pasta.jpeg' },
+      { name:'Caesar Salad',         location:'Cafeteria',      consumeBy:'2025-07-10', distance:'0.3 mi', img:'food/caesar_salad.jpg' },
+      { name:'Beef Burger',          location:'Sports Complex', consumeBy:'2025-08-05', distance:'0.6 mi', img:'food/beef_burger.jpg' },
+      { name:'Vegan Wrap',           location:'Student Union',  consumeBy:'2025-09-12', distance:'0.5 mi', img:'food/vegan_wrap.jpg' },
+      { name:'Fruit Bowl',           location:'Dormitory',      consumeBy:'2025-10-03', distance:'0.7 mi', img:'food/fruit_bowl.jpg' },
+      { name:'Sushi Platter',        location:'East Campus',    consumeBy:'2025-11-22', distance:'1.2 mi', img:'food/sushi_platters.jpg' },
+      { name:'Tacos',                location:'West Campus',    consumeBy:'2025-12-01', distance:'0.9 mi', img:'food/tacos.jpg' },
+      { name:'Mediterranean Platter',location:'Central Hall',   consumeBy:'2025-04-18', distance:'0.1 mi', img:'food/mediterranean_platter.jpg' },
+      { name:'Chocolate Cake',       location:'Event Hall',     consumeBy:'2025-03-30', distance:'0.2 mi', img:'food/chocolate_cake.jpg' }
+    ];
+    let reservations = [], currentMeal = null;
+
+    function updateWelcome() {
+      const name = localStorage.getItem('name')?.trim() || 'User';
+      document.getElementById('welcomeText').textContent = `Welcome, ${name}!`;
+    }
+
     window.addEventListener('load', () => {
       setTimeout(() => {
         const splash = document.getElementById('splash');
@@ -384,63 +408,78 @@
         splash.addEventListener('transitionend', () => {
           splash.style.display = 'none';
           showScreen('home');
+          renderFoodList();
         });
       }, 600);
-    });
 
-    // Data
-    let availableMeals = [
-      { name:'Grilled Chicken', location:'Student Center', consumeBy:'2025-05-15', distance:'0.2 mi', image:'food/grilled_chicken.jpg' },
-      { name:'Vegetarian Pasta', location:'Library', consumeBy:'2025-06-20', distance:'0.4 mi', image:'food/vegetarian_pasta.jpeg' },
-      { name:'Caesar Salad',     location:'Cafeteria', consumeBy:'2025-07-10', distance:'0.3 mi', image:'food/caesar_salad.jpg' },
-      { name:'Beef Burger',      location:'Sports Complex',consumeBy:'2025-08-05', distance:'0.6 mi', image:'food/beef_burger.jpg' },
-      { name:'Vegan Wrap',       location:'Student Union',  consumeBy:'2025-09-12', distance:'0.5 mi', image:'food/vegan_wrap.jpg' },
-      { name:'Fruit Bowl',       location:'Dormitory',      consumeBy:'2025-10-03', distance:'0.7 mi', image:'food/fruit_bowl.jpg' },
-      { name:'Sushi Platter',    location:'East Campus',    consumeBy:'2025-11-22', distance:'1.2 mi', image:'food/sushi_platters.jpg' },
-      { name:'Tacos',            location:'West Campus',    consumeBy:'2025-12-01', distance:'0.9 mi', image:'food/tacos.jpg' },
-      { name:'Mediterranean Platter', location:'Central Hall',consumeBy:'2025-04-18', distance:'0.1 mi', image:'food/mediterranean_platter.jpg' },
-      { name:'Chocolate Cake',   location:'Event Hall',     consumeBy:'2025-03-30', distance:'0.2 mi', image:'food/chocolate_cake.jpg' },
-    ];
-    let reservations = [], currentMeal = null, userName = '';
+      document.getElementById('searchInput').addEventListener('input', renderFoodList);
+      document.getElementById('sortSelect').addEventListener('change', renderFoodList);
 
-    const filterInput = document.getElementById('filterInput');
-    const sortSelect  = document.getElementById('sortSelect');
-
-    filterInput?.addEventListener('input', renderFoodList);
-    sortSelect?.addEventListener('change', renderFoodList);
-
-    document.getElementById('userName')
-      .addEventListener('input', e => {
-        userName = e.target.value;
-        document.getElementById('greeting').textContent =
-          userName ? `Welcome, ${userName}!` : 'Welcome to UIC Food Share!';
+      // load Profile fields
+      ['name','uin','netid'].forEach(key => {
+        const inp = document.getElementById(key + 'Input');
+        const saved = localStorage.getItem(key);
+        if (saved) inp.value = saved;
       });
 
-    function renderFoodList() {
-      const container = document.getElementById('foodListContainer');
-      container.innerHTML = '';
-      let list = availableMeals.slice();
+      // UIN validation
+      const uinInp = document.getElementById('uinInput');
+      uinInp.addEventListener('blur', () => {
+        if (uinInp.value && uinInp.value.length !== 9) {
+          showFeedback('UIN must be exactly 9 digits');
+        }
+      });
 
-      const term = filterInput.value.toLowerCase();
-      if (term) list = list.filter(m => m.name.toLowerCase().includes(term));
+      updateWelcome();
+    });
 
-      if (sortSelect.value === 'consumeBy') {
-        list.sort((a,b)=> new Date(a.consumeBy) - new Date(b.consumeBy));
-      } else {
-        list.sort((a,b)=> parseFloat(a.distance) - parseFloat(b.distance));
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav-button')
+        .forEach(b=>b.classList.toggle('active', b.dataset.screen===id));
+
+      if (id==='home') updateWelcome();
+      if (id==='foodList') renderFoodList();
+      if (id==='confirmation') {
+        // clear previous banner
+        document.getElementById('claimMsg').style.display = 'none';
+        renderConfirmationQR();
       }
+      if (id==='reservations') updateReservations();
+    }
 
+    function showFeedback(msg) {
+      const f = document.getElementById('feedback');
+      f.textContent = msg;
+      f.classList.add('show');
+      setTimeout(()=>f.classList.remove('show'),1000);
+    }
+
+    function renderFoodList() {
+      const container = document.getElementById('foodListContent');
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const sortBy = document.getElementById('sortSelect').value;
+      let list = meals.filter(m=>
+        !reservations.some(r=>r.name===m.name && r.consumeBy===m.consumeBy) &&
+        m.name.toLowerCase().includes(q)
+      );
+      if (sortBy==='expiration') {
+        list.sort((a,b)=>new Date(a.consumeBy)-new Date(b.consumeBy));
+      } else if (sortBy==='distance') {
+        list.sort((a,b)=>parseFloat(a.distance)-parseFloat(b.distance));
+      }
+      container.innerHTML='';
       list.forEach(m=>{
-        const card = document.createElement('div');
+        const card=document.createElement('div');
         card.className='card';
         card.innerHTML=`
           <h3>${m.name}</h3>
           <p class="distance">Distance: ${m.distance}</p>
           <p>Location: ${m.location}</p>
-          <p>Consume By: ${new Date(m.consumeBy).toLocaleDateString('en-US',{
-            month:'long',day:'numeric',year:'numeric'})}</p>
+          <p>Consume By: ${m.consumeBy}</p>
           <div class="card-placeholder">
-            <img src="${m.image}" alt="${m.name}"/>
+            <img src="${m.img}" alt="${m.name}"/>
           </div>
           <button class="button"
             onclick="claimMeal('${m.name}','${m.location}','${m.consumeBy}','${m.distance}')">
@@ -450,64 +489,57 @@
       });
     }
 
-    function showScreen(id) {
-      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      document.querySelectorAll('.nav-button')
-        .forEach(b=>b.classList.toggle('active', b.dataset.screen===id));
-      if (id==='foodList')       renderFoodList();
-      if (id==='confirmation')   renderConfirmationQR();
-      if (id==='reservations')   updateReservations();
-    }
-
-    function claimMeal(name,location,consumeBy,distance) {
-      currentMeal = {name,location,consumeBy,distance};
+    function claimMeal(name,loc,by,dist) {
+      showFeedback('Meal claimed!');
+      currentMeal={name,location:loc,consumeBy:by,distance:dist};
       reservations.push(currentMeal);
-      availableMeals = availableMeals.filter(m=>!(m.name===name && m.location===location));
-      showScreen('confirmation');
+      setTimeout(()=>{
+        renderFoodList();
+        showScreen('confirmation');
+        // show the green banner
+        document.getElementById('claimMsg').style.display='block';
+      },300);
     }
 
     function renderConfirmationQR() {
+      const con=document.getElementById('qrContainer');
+      con.innerHTML='';
+      new QRCode(con,{
+        text: JSON.stringify(currentMeal),
+        width:200,height:200
+      });
       document.getElementById('mealDetails').innerHTML=`
         <h3>${currentMeal.name}</h3>
         <p>Location: ${currentMeal.location}</p>
-        <p>Consume By: ${new Date(currentMeal.consumeBy).toLocaleDateString('en-US',{
-          month:'long',day:'numeric',year:'numeric'})}</p>
+        <p>Consume By: ${currentMeal.consumeBy}</p>
         <p><em>Show this to the volunteer for check-in</em></p>`;
-      const c=document.getElementById('qrContainer');
-      c.innerHTML='';
-      new QRCode(c,{ text: JSON.stringify(currentMeal), width:200, height:200 });
     }
 
     function updateReservations() {
-      const list = document.getElementById('reservationsList');
-      list.innerHTML = '';
+      const list=document.getElementById('reservationsList');
+      list.innerHTML='';
       if (!reservations.length) {
-        list.innerHTML = `<p style="text-align:center;color:#777;font-size:16px;">
-                            No reservations yet.
-                          </p>`;
+        list.innerHTML=`<p style="text-align:center;color:#777;font-size:16px;">
+                          No reservations yet.
+                        </p>`;
         return;
       }
       reservations.forEach((m,i)=>{
-        const diff = new Date(m.consumeBy) - Date.now();
-        const status = diff>0? 'Pending Pickup':'Expired';
-        const days   = Math.max(0,Math.floor(diff/86400000));
-        const hrs    = Math.max(0,Math.floor((diff%86400000)/3600000));
-        const countdown = diff>0? `${days}d ${hrs}h left`:'Expired';
-
-        const card = document.createElement('div');
+        const diff=new Date(m.consumeBy)-Date.now();
+        const status=diff>0?'Pending Pickup':'Expired';
+        const days=Math.max(0,Math.floor(diff/86400000));
+        const hrs=Math.max(0,Math.floor((diff%86400000)/3600000));
+        const countdown=diff>0?`${days}d ${hrs}h left`:'Expired';
+        const card=document.createElement('div');
         card.className='card';
         card.innerHTML=`
           <div class="status">${status}</div>
           <div class="countdown">${countdown}</div>
           <h3>${m.name}</h3>
           <p>Location: ${m.location}</p>
-          <p>Consume By: ${new Date(m.consumeBy).toLocaleDateString('en-US',{
-            month:'long',day:'numeric',year:'numeric'})}</p>
+          <p>Consume By: ${m.consumeBy}</p>
           <div class="reservation-actions">
-            <button class="button view-btn" onclick="viewDetails(${i})">
-              View Meal Details
-            </button>
+            <button class="view-btn" onclick="viewDetails(${i})">View Meal Details</button>
             <button class="remove-btn" onclick="removeReservation(${i})">
               <img src="trash.png" alt="Remove"/>
             </button>
@@ -517,20 +549,39 @@
     }
 
     function viewDetails(i) {
-      currentMeal = reservations[i];
+      currentMeal=reservations[i];
       showScreen('confirmation');
     }
 
     function removeReservation(i) {
       reservations.splice(i,1);
       updateReservations();
+      renderFoodList();
+      const f=document.getElementById('feedback');
+      f.textContent='Reservation removed!';
+      f.style.background='#d32f2f';
+      f.classList.add('show');
+      setTimeout(()=>{
+        f.classList.remove('show');
+        f.style.background='#4caf50';
+      },1000);
     }
 
     function toggleDarkMode() {
-      const dev = document.querySelector('.device');
-      const lbl = document.getElementById('themeLabel');
-      dev.classList.toggle('dark-mode');
-      lbl.textContent = dev.classList.contains('dark-mode') ? 'Dark Mode' : 'Light Mode';
+      const d=document.querySelector('.device');
+      const l=document.getElementById('themeLabel');
+      d.classList.toggle('dark-mode');
+      l.textContent=d.classList.contains('dark-mode')?'Dark Mode':'Light Mode';
+    }
+
+    // Save Profile changes
+    function saveProfile() {
+      ['name','uin','netid'].forEach(key=>{
+        const val=document.getElementById(key+'Input').value;
+        localStorage.setItem(key,val);
+      });
+      showFeedback('Changes saved!');
+      updateWelcome();
     }
   </script>
 </body>
